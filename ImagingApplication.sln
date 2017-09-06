@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImagingApplication", "ImagingApplication\ImagingApplication.csproj", "{CFD461B3-EBD9-42F7-867B-E4BE170CDC0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImagingTools", "ImagingTools\ImagingTools.csproj", "{BB6FB79A-6CB6-477D-9D41-684A2D49791B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{CFD461B3-EBD9-42F7-867B-E4BE170CDC0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFD461B3-EBD9-42F7-867B-E4BE170CDC0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFD461B3-EBD9-42F7-867B-E4BE170CDC0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB6FB79A-6CB6-477D-9D41-684A2D49791B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB6FB79A-6CB6-477D-9D41-684A2D49791B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB6FB79A-6CB6-477D-9D41-684A2D49791B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB6FB79A-6CB6-477D-9D41-684A2D49791B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C7CBA4BD-FD3E-4BA7-88A2-F8F493165138}
 	EndGlobalSection
 EndGlobal
