@@ -8,13 +8,14 @@ namespace ImagingApplication
     public class MainWindowViewModel : BindableBase
     {
         private string processedText;
+        private bool isProcessing;
 
         public MainWindowViewModel()
         {
-            this.DoImageCommand = new DelegateCommand(this.DoImage);
+            this.PerformOcrCommand = new DelegateCommand(this.PerformOcr, this.CanPerformOcr).ObservesProperty(() => this.IsProcessing);
         }
 
-        public ICommand DoImageCommand { get; }
+        public ICommand PerformOcrCommand { get; }
 
         public string ProcessedText
         {
@@ -28,9 +29,31 @@ namespace ImagingApplication
                 this.SetProperty(ref this.processedText, value);
             }
         }
-        private void DoImage()
+
+        public bool IsProcessing
         {
-            this.ProcessedText = ImagingTools.Tools.PerformOcr(@"test images\helloworld.png");
+            get
+            {
+                return this.isProcessing;
+            }
+
+            set
+            {
+                this.SetProperty(ref this.isProcessing, value);
+            }
+        }
+
+        private bool CanPerformOcr()
+        {
+            return !this.IsProcessing;
+        }
+
+        private async void PerformOcr()
+        {
+            this.IsProcessing = true;
+            this.ProcessedText = "Working...";
+            this.ProcessedText = await Task.Run(() => ImagingTools.Tools.PerformOcr(@"test images\helloworld.png"));
+            this.IsProcessing = false;
         }
     }
 }

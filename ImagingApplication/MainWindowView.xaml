@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImagingApplication"
         mc:Ignorable="d"
-        d:DataContext="MainWindowViewModel"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
         Title="Imaging Application" Height="350" Width="525">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <Button Content="Do Image" Command="{Binding DoImageCommand}"/>
+            <Button Content="Perform OCR" Command="{Binding PerformOcrCommand}"/>
             <TextBlock Text="{Binding ProcessedText}"/>
         </StackPanel>
         
