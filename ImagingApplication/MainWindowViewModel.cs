@@ -13,9 +13,12 @@ namespace ImagingApplication
         public MainWindowViewModel()
         {
             this.PerformOcrCommand = new DelegateCommand(this.PerformOcr, this.CanPerformOcr).ObservesProperty(() => this.IsProcessing);
+            this.FindObjectInSceneCommand = new DelegateCommand(this.FindObjectInScene, this.CanFindObjectInScene).ObservesProperty(() => this.IsProcessing);
         }
 
         public ICommand PerformOcrCommand { get; }
+
+        public ICommand FindObjectInSceneCommand { get; }
 
         public string ProcessedText
         {
@@ -53,6 +56,19 @@ namespace ImagingApplication
             this.IsProcessing = true;
             this.ProcessedText = "Working...";
             this.ProcessedText = await Task.Run(() => ImagingTools.Tools.PerformOcr(@"test images\helloworld.png"));
+            this.IsProcessing = false;
+        }
+
+        private bool CanFindObjectInScene()
+        {
+            return !this.IsProcessing;
+        }
+
+        private async void FindObjectInScene()
+        {
+            this.IsProcessing = true;
+            this.ProcessedText = "Working...";
+            await Task.Run(() => ImagingTools.Tools.IsObjectInScene(@"test images\model.jpg", @"test images\scene.jpg"));
             this.IsProcessing = false;
         }
     }

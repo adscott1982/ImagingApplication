@@ -11,6 +11,7 @@
         <StackPanel Orientation="Vertical">
             <Button Content="Perform OCR" Command="{Binding PerformOcrCommand}"/>
             <TextBlock Text="{Binding ProcessedText}"/>
+            <Button Content="Find Object in Scene" Command="{Binding FindObjectInSceneCommand}"/>
         </StackPanel>
         
     </Grid>
