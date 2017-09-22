@@ -34,14 +34,10 @@ namespace ImagingTools
 
                 using (var imageWithFeatures = new Image<Gray, byte>(objectImage.Bitmap))
                 {
-                    var font = FontFace.HersheyPlain;
-
                     foreach(var imageFeature in imageFeatures)
                     {
-                        var x = (int)imageFeature.Point.X;
-                        var y = (int)imageFeature.Point.Y;
-                        var point = new System.Drawing.Point(x, y);
-                        imageWithFeatures.Draw("x", point, font, 1d, new Gray());
+                        var point = new System.Drawing.PointF(imageFeature.Point.X, imageFeature.Point.Y);
+                        imageWithFeatures.Draw(new Cross2DF(point, 5, 5), new Gray(), 1);
                     }
 
                     ImageViewer.Show(imageWithFeatures);

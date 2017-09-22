@@ -111,12 +111,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ImagingTools\ImagingTools.csproj">
-      <Project>{bb6fb79a-6cb6-477d-9d41-684a2d49791b}</Project>
-      <Name>ImagingTools</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Test Images\helloworld.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -151,6 +145,12 @@
     <None Include="Test Images\scene.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ImagingTools\ImagingTools.csproj">
+      <Project>{bb6fb79a-6cb6-477d-9d41-684a2d49791b}</Project>
+      <Name>ImagingTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
