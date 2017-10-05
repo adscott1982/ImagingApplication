@@ -6,6 +6,12 @@ using Emgu.CV.OCR;
 using Emgu.CV.Structure;
 using Emgu.CV.XFeatures2D;
 using System.IO;
+using Emgu.CV.Util;
+using System.Collections.Generic;
+using System.Linq;
+using Emgu.CV.Features2D;
+using System.Drawing;
+using System;
 
 namespace ImagingTools
 {
@@ -20,31 +26,89 @@ namespace ImagingTools
                     ocrProvider.SetImage(image);
                     ocrProvider.Recognize();
                     var text = ocrProvider.GetUTF8Text();
+
+                    text += "added";
                     return text;
                 }
             }
         }
 
-        public static bool IsObjectInScene(string objectImagePath, string sceneImagePath)
+        public static bool IsObjectInScene(string modelImagePath, string sceneImagePath)
         {
-            using (var objectImage = new Image<Gray, byte>(objectImagePath))
+            using (var modelImage = new Image<Gray, byte>(modelImagePath))
+            using (var sceneImage = new Image<Gray, byte>(sceneImagePath))
             {
                 var surfDetector = new SURF(400);
-                var imageFeatures = surfDetector.Detect(objectImage);
 
-                using (var imageWithFeatures = new Image<Gray, byte>(objectImage.Bitmap))
+                var modelKeyPoints = new VectorOfKeyPoint(surfDetector.Detect(modelImage));
+                var sceneKeyPoints = new VectorOfKeyPoint(surfDetector.Detect(sceneImage));
+
+                var modelDescriptors = ComputeDescriptors(surfDetector, modelKeyPoints, modelImage);
+                var sceneDescriptors = ComputeDescriptors(surfDetector, sceneKeyPoints, sceneImage);
+
+                var homoMatrix = Match(modelDescriptors, sceneDescriptors, modelKeyPoints, sceneKeyPoints);
+
+                if (homoMatrix == null)
                 {
-                    foreach(var imageFeature in imageFeatures)
-                    {
-                        var point = new System.Drawing.PointF(imageFeature.Point.X, imageFeature.Point.Y);
-                        imageWithFeatures.Draw(new Cross2DF(point, 5, 5), new Gray(), 1);
-                    }
+                    return false;
+                }
 
-                    ImageViewer.Show(imageWithFeatures);
+                //draw a rectangle along the projected model
+                Rectangle rect = new Rectangle(Point.Empty, modelImage.Size);
+                PointF[] pts = new PointF[]
+                {
+                  new PointF(rect.Left, rect.Bottom),
+                  new PointF(rect.Right, rect.Bottom),
+                  new PointF(rect.Right, rect.Top),
+                  new PointF(rect.Left, rect.Top)
+                };
+                pts = CvInvoke.PerspectiveTransform(pts, homoMatrix);
+
+                Point[] points = Array.ConvertAll<PointF, Point>(pts, Point.Round);
+                using (VectorOfPoint vp = new VectorOfPoint(points))
+                using (var displayImage = new Image<Bgr, byte>(sceneImagePath))
+                {
+                    CvInvoke.Polylines(displayImage, vp, true, new MCvScalar(0, 255, 0), 5);
+                    ImageViewer.Show(displayImage);
                 }
             }
 
+            
             return false;
+        }
+
+        private static UMat ComputeDescriptors(SURF surf, VectorOfKeyPoint imageFeatures, Image<Gray, byte> image)
+        {
+            var keyPoints = new VectorOfKeyPoint();
+            var descriptors = new UMat();
+
+            keyPoints.Push(imageFeatures);
+
+            surf.Compute(image, keyPoints, descriptors);
+
+            return descriptors;
+        }
+
+        private static Mat Match(UMat modelDescriptors, UMat sceneDescriptors, VectorOfKeyPoint modelKeyPoints, VectorOfKeyPoint sceneKeyPoints)
+        {
+            var matcher = new BFMatcher(DistanceType.L2);
+            matcher.Add(modelDescriptors);
+
+            var matches = new VectorOfVectorOfDMatch();
+            var indicesMatrix = new Matrix<int>(sceneDescriptors.Rows, 2);
+
+            Mat mask;
+
+            using (var distanceMatrix = new Matrix<float>(sceneDescriptors.Rows, 2))
+            {
+                matcher.KnnMatch(sceneDescriptors, matches, 2, null);
+                mask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
+                mask.SetTo(new MCvScalar(255));
+            }
+
+            var result = Features2DToolbox.VoteForSizeAndOrientation(modelKeyPoints, sceneKeyPoints, matches, mask, 1.5d, 20);
+            var homoMatrix = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(modelKeyPoints, sceneKeyPoints, matches, mask, 2);
+            return homoMatrix;
         }
     }
 }
