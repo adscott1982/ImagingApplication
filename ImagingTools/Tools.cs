@@ -12,11 +12,22 @@ using System.Linq;
 using Emgu.CV.Features2D;
 using System.Drawing;
 using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace ImagingTools
 {
-    public static class Tools
+    public class Tools
     {
+        private CascadeClassifier faceCascade;
+        private CascadeClassifier eyeCascade;
+
+        public Tools()
+        {
+            this.faceCascade = new CascadeClassifier(@"haar cascades\haarcascade_frontalface_default.xml");
+            this.eyeCascade = new CascadeClassifier(@"haar cascades\haarcascade_eye.xml");
+        }
+
         public static string PerformOcr(string imagePath)
         {
             using (var image = new Image<Bgr, byte>(Path.GetFullPath(imagePath)))
@@ -109,6 +120,44 @@ namespace ImagingTools
             var result = Features2DToolbox.VoteForSizeAndOrientation(modelKeyPoints, sceneKeyPoints, matches, mask, 1.5d, 20);
             var homoMatrix = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(modelKeyPoints, sceneKeyPoints, matches, mask, 2);
             return homoMatrix;
+        }
+
+        public TimeSpan PerformEyeDetection(string imagePath)
+        {
+            var sw = Stopwatch.StartNew();
+            using (var image = new Image<Gray, byte>(imagePath))
+            {
+                var faces = this.faceCascade.DetectMultiScale(image, 1.3d, 5);
+
+                if (faces.Length > 0)
+                {
+                    foreach (var rectangle in faces)
+                    {
+                        var subRect = image.GetSubRect(rectangle);
+
+                        var eyes = this.eyeCascade.DetectMultiScale(subRect);
+
+                        foreach (var eye in eyes)
+                        {
+                            CvInvoke.Rectangle(subRect, eye, new MCvScalar(0, 255, 0));
+                        }
+                    }
+                }
+                else
+                {
+                    var eyes = this.eyeCascade.DetectMultiScale(image, 1.1d, 4);
+
+                    foreach (var eye in eyes)
+                    {
+                        CvInvoke.Rectangle(image, eye, new MCvScalar(0, 255, 0));
+                    }
+                }
+
+                sw.Stop();
+                ImageViewer.Show(image);
+            }
+
+            return sw.Elapsed;
         }
     }
 }

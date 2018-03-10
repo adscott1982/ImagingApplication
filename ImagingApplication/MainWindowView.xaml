@@ -8,10 +8,13 @@
         d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
         Title="Imaging Application" Height="350" Width="525">
     <Grid>
-        <StackPanel Orientation="Vertical">
-            <Button Content="Perform OCR" Command="{Binding PerformOcrCommand}"/>
-            <TextBlock Text="{Binding ProcessedText}"/>
-            <Button Content="Find Object in Scene" Command="{Binding FindObjectInSceneCommand}"/>
+        <StackPanel Margin="5" Orientation="Vertical">
+            <Button Margin="0 5 0 0"  Content="Perform OCR" Command="{Binding PerformOcrCommand}"/>
+            <TextBlock Margin="0 5 0 0"  Text="{Binding ProcessedText}"/>
+            <Button Margin="0 5 0 0"  Content="Find Object in Scene" Command="{Binding FindObjectInSceneCommand}"/>
+            <Button Margin="0 5 0 0"  Content="Perform Eye Detection" Command="{Binding PerformEyeDetectionCommand}"/>
+            <Button Margin="0 5 0 0"  Content="Select Image File" Command="{Binding SelectImageFileCommand}"/>
+            <TextBlock Margin="0 5 0 0"  Text="{Binding SelectedImagePath}"/>
         </StackPanel>
         
     </Grid>

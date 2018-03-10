@@ -1,3 +1,7 @@
+using System.Diagnostics;
+using ImagingTools;
+using Microsoft.Win32;
+
 namespace ImagingApplication
 {
     using Prism.Commands;
@@ -9,40 +13,60 @@ namespace ImagingApplication
     {
         private string processedText;
         private bool isProcessing;
+        private Tools imageTools;
+        private string selectedImagePath;
 
         public MainWindowViewModel()
         {
+            this.SelectedImagePath = @"test images\Straight.jpg";
+            this.imageTools = new Tools();
+            this.SelectImageFileCommand = new DelegateCommand(this.SelectImageFile, this.CanSelectImageFile).ObservesProperty(() => this.IsProcessing);
             this.PerformOcrCommand = new DelegateCommand(this.PerformOcr, this.CanPerformOcr).ObservesProperty(() => this.IsProcessing);
             this.FindObjectInSceneCommand = new DelegateCommand(this.FindObjectInScene, this.CanFindObjectInScene).ObservesProperty(() => this.IsProcessing);
+            this.PerformEyeDetectionCommand = new DelegateCommand(this.PerformEyeDetection, this.CanPerformEyeDetection).ObservesProperty(() => this.IsProcessing);
         }
+
+        public ICommand SelectImageFileCommand { get; }
 
         public ICommand PerformOcrCommand { get; }
 
         public ICommand FindObjectInSceneCommand { get; }
 
+        public ICommand PerformEyeDetectionCommand { get; }
+
+        public string SelectedImagePath
+        {
+            get => this.selectedImagePath;
+            set => this.SetProperty(ref this.selectedImagePath, value);
+        }
+
         public string ProcessedText
         {
-            get
-            {
-                return this.processedText;
-            }
-
-            set
-            {
-                this.SetProperty(ref this.processedText, value);
-            }
+            get => this.processedText;
+            set => this.SetProperty(ref this.processedText, value);
         }
 
         public bool IsProcessing
         {
-            get
-            {
-                return this.isProcessing;
-            }
+            get => this.isProcessing;
+            set => this.SetProperty(ref this.isProcessing, value);
+        }
 
-            set
+        private bool CanSelectImageFile()
+        {
+            return !this.IsProcessing;
+        }
+
+        private void SelectImageFile()
+        {
+            var openFileDialog = new OpenFileDialog();
+
+            openFileDialog.InitialDirectory = "test images";
+            openFileDialog.Filter = "Images|*.jpg;*.png;*.bmp|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog().HasValue)
             {
-                this.SetProperty(ref this.isProcessing, value);
+                this.SelectedImagePath = openFileDialog.FileName;
             }
         }
 
@@ -68,7 +92,24 @@ namespace ImagingApplication
         {
             this.IsProcessing = true;
             this.ProcessedText = "Working...";
-            await Task.Run(() => ImagingTools.Tools.IsObjectInScene(@"test images\model.jpg", @"test images\scene.jpg"));
+            await Task.Run(() => Tools.IsObjectInScene(@"test images\model.jpg", @"test images\scene.jpg"));
+            this.ProcessedText = null;
+            this.IsProcessing = false;
+        }
+
+        private bool CanPerformEyeDetection()
+        {
+            return !this.IsProcessing;
+        }
+
+        private async void PerformEyeDetection()
+        {
+            this.IsProcessing = true;
+            this.ProcessedText = "Working...";
+            //var time = await Task.Run(() => this.imageTools.PerformEyeDetection(@"test images\straight.jpg"));
+            //var time = await Task.Run(() => this.imageTools.PerformEyeDetection(@"test images\Straightsmallerbmp.bmp"));
+            var time = await Task.Run(() => this.imageTools.PerformEyeDetection(this.SelectedImagePath));
+            this.ProcessedText = $"Eye detection completed in {time.TotalMilliseconds:F2} ms";
             this.IsProcessing = false;
         }
     }

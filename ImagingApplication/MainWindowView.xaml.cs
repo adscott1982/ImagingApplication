@@ -9,7 +9,7 @@ namespace ImagingApplication
     {
         public MainWindowView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             this.DataContext = new MainWindowViewModel();
         }
     }
