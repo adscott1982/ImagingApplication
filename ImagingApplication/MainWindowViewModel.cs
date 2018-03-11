@@ -24,6 +24,7 @@ namespace ImagingApplication
             this.PerformOcrCommand = new DelegateCommand(this.PerformOcr, this.CanPerformOcr).ObservesProperty(() => this.IsProcessing);
             this.FindObjectInSceneCommand = new DelegateCommand(this.FindObjectInScene, this.CanFindObjectInScene).ObservesProperty(() => this.IsProcessing);
             this.PerformEyeDetectionCommand = new DelegateCommand(this.PerformEyeDetection, this.CanPerformEyeDetection).ObservesProperty(() => this.IsProcessing);
+            this.LiveCaptureCommand = new DelegateCommand(this.LiveCapture, this.CanLiveCapture).ObservesProperty(() => this.IsProcessing);
         }
 
         public ICommand SelectImageFileCommand { get; }
@@ -33,6 +34,8 @@ namespace ImagingApplication
         public ICommand FindObjectInSceneCommand { get; }
 
         public ICommand PerformEyeDetectionCommand { get; }
+
+        public ICommand LiveCaptureCommand { get; }
 
         public string SelectedImagePath
         {
@@ -110,6 +113,19 @@ namespace ImagingApplication
             //var time = await Task.Run(() => this.imageTools.PerformEyeDetection(@"test images\Straightsmallerbmp.bmp"));
             var time = await Task.Run(() => this.imageTools.PerformEyeDetection(this.SelectedImagePath));
             this.ProcessedText = $"Eye detection completed in {time.TotalMilliseconds:F2} ms";
+            this.IsProcessing = false;
+        }
+
+        private bool CanLiveCapture()
+        {
+            return !this.IsProcessing;
+        }
+
+        private async void LiveCapture()
+        {
+            this.IsProcessing = true;
+            this.ProcessedText = "Performing Live Capture...";
+            await Task.Run(() => this.imageTools.PerformLiveCapture());
             this.IsProcessing = false;
         }
     }

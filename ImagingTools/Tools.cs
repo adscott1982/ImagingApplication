@@ -122,37 +122,66 @@ namespace ImagingTools
             return homoMatrix;
         }
 
-        public TimeSpan PerformEyeDetection(string imagePath)
+        public void PerformLiveCapture()
+        {
+            var capture = new VideoCapture(0);
+            var mat = new Mat();
+            var viewer = new ImageViewer();
+            viewer.Show();
+
+            while (true)
+            {
+                capture.Read(mat);
+                var tempImage = this.PerformEyeDetectionMat(mat);
+                viewer.Image = tempImage;
+
+                viewer.Refresh();
+
+                tempImage.Dispose();
+            }
+            
+        }
+
+        public Image<Gray, byte> PerformEyeDetectionMat(Mat mat)
         {
             var sw = Stopwatch.StartNew();
-            using (var image = new Image<Gray, byte>(imagePath))
+            var image = new Image<Gray, byte>(mat.Bitmap);
+            var faces = this.faceCascade.DetectMultiScale(image, 1.3d, 5);
+
+            if (faces.Length > 0)
             {
-                var faces = this.faceCascade.DetectMultiScale(image, 1.3d, 5);
-
-                if (faces.Length > 0)
+                foreach (var rectangle in faces)
                 {
-                    foreach (var rectangle in faces)
-                    {
-                        var subRect = image.GetSubRect(rectangle);
+                    var subRect = image.GetSubRect(rectangle);
 
-                        var eyes = this.eyeCascade.DetectMultiScale(subRect);
-
-                        foreach (var eye in eyes)
-                        {
-                            CvInvoke.Rectangle(subRect, eye, new MCvScalar(0, 255, 0));
-                        }
-                    }
-                }
-                else
-                {
-                    var eyes = this.eyeCascade.DetectMultiScale(image, 1.1d, 4);
+                    var eyes = this.eyeCascade.DetectMultiScale(subRect);
 
                     foreach (var eye in eyes)
                     {
-                        CvInvoke.Rectangle(image, eye, new MCvScalar(0, 255, 0));
+                        CvInvoke.Rectangle(subRect, eye, new MCvScalar(0, 255, 0));
                     }
                 }
+            }
+            else
+            {
+                var eyes = this.eyeCascade.DetectMultiScale(image, 1.1d, 4);
 
+                foreach (var eye in eyes)
+                {
+                    CvInvoke.Rectangle(image, eye, new MCvScalar(0, 255, 0));
+                }
+            }
+
+            return image;
+        }
+
+        public TimeSpan PerformEyeDetection(string imagePath)
+        {
+            var sw = Stopwatch.StartNew();
+
+            using (var mat = new Mat(imagePath))
+            using (var image = this.PerformEyeDetectionMat(mat))
+            {
                 sw.Stop();
                 ImageViewer.Show(image);
             }
